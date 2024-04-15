@@ -4,10 +4,14 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
+
+
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true}));
-app.use(express.static('public'))
+app.use(express.static('public'));
+app.use(cookieParser());
 
 const upload = multer({ 
     dest: 'uploads/',
@@ -36,8 +40,13 @@ function writeUsersToFile(users) {
     fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
 }
 
+
+
 function authenticate(req, res, next) {
     
+
+    console.log('loggedIn Cookie Value:', req.cookies && req.cookies.loggedIn);
+console.log('Request Cookies:', req.cookies);
     // Middleware to check authentication
 
     // Check if req.cookies is defined and loggedIn cookie is set to 'true'
@@ -96,7 +105,7 @@ app.post('/login', async (req, res) => {
             return res.status(401).send('Invalid username or password');
         }
 
-        res.cookie('loggedIn', true);
+        res.cookie('loggedIn', true); 
 
         res.redirect('uploadPage.html');
     } catch (error) {
@@ -174,7 +183,7 @@ app.get('/upload-page', authenticate, (req, res) => {
 app.post('/logout', (req, res) => {
     // Clear the authentication token or session data
     
-    res.cookie('loggedIn', 'false', { maxAge: 0 }); 
+    res.clearCookie('loggedIn'); 
     
     // Redirect the user to the login page or send a response confirming logout
     res.redirect('loginPage.html'); 
